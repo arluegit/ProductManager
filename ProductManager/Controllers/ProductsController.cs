@@ -163,7 +163,8 @@
                         dbProduct.Name = product.Name;
                         dbProduct.Price = product.Price;
                         dbProduct.Quantity = product.Quantity;
-                        dbProduct.CategoryId = product.CategoryId; // 記得加這行
+                        dbProduct.CategoryId = product.CategoryId;
+                        dbProduct.IsAvailable = product.IsAvailable;
 
                         if (imageFile != null && imageFile.Length > 0)
                         {
@@ -267,7 +268,7 @@
                 public IActionResult AllProducts()
                 {
                     var products = _context.Products
-                        .Where(p => p.IsActive) // ✅ 只抓上架產品
+                        .Where(p => p.IsAvailable) // ✅ 只抓上架產品
                         .ToList();
                     return View(products);
                 }
@@ -325,10 +326,20 @@
                     var product = await _context.Products.FindAsync(id);
                     if (product == null) return NotFound();
 
-                    product.IsActive = !product.IsActive;
+                    product.IsAvailable = !product.IsAvailable;
                     await _context.SaveChangesAsync();
 
-                    TempData["Message"] = $"產品已{(product.IsActive ? "上架" : "下架")}";
+                    TempData["Message"] = $"產品已{(product.IsAvailable ? "上架" : "下架")}";
+                    return RedirectToAction("Index");
+                }
+                public IActionResult ToggleAvailable(int id)
+                {
+                    var product = _context.Products.Find(id);
+                    if (product == null) return NotFound();
+
+                    product.IsAvailable = !product.IsAvailable;
+                    _context.SaveChanges();
+
                     return RedirectToAction("Index");
                 }
 

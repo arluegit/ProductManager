@@ -33,7 +33,7 @@ namespace ProductManager.Models
 
         //products上架
         public bool IsAvailable { get; set; } = true; // 預設為 true，表示產品上架中
-        public bool IsActive { get; internal set; }
+        
     }
 
 
