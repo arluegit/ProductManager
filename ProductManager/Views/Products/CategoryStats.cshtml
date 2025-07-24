@@ -1,0 +1,33 @@
+﻿@{
+    ViewData["Title"] = "產品分類統計";
+    var categories = (string[])ViewBag.Categories;
+    var counts = (int[])ViewBag.Counts;
+}
+
+<h2>各分類產品數量統計</h2>
+
+<canvas id="categoryChart" width="800" height="400"></canvas>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const ctx = document.getElementById('categoryChart').getContext('2d');
+        const categoryChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: @Html.Raw(Json.Serialize(categories)),
+                datasets: [{
+                    label: '產品數量',
+                    data: @Html.Raw(Json.Serialize(counts)),
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)'
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    </script>
+}

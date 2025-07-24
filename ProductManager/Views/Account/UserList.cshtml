@@ -1,0 +1,68 @@
+﻿@model IEnumerable<ProductManager.Models.User>
+
+@{
+    ViewData["Title"] = "帳號管理";
+}
+
+<h1>帳號管理</h1>
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success">@TempData["Message"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+<form method="get" asp-action="UserList" class="mb-3">
+    <div class="input-group">
+        <input type="text" name="search" value="@ViewBag.Search" class="form-control" placeholder="輸入帳號查詢">
+        <button type="submit" class="btn btn-primary">查詢</button>
+    </div>
+</form>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>帳號</th>
+            <th>角色</th>
+            <th>狀態</th>
+            <th>操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            <tr>
+                <td>@user.Username</td>
+                <td>
+                    @foreach (var role in user.UserRoles.Select(ur => ur.Role.Name))
+                    {
+                        <span class="badge bg-secondary me-1">@role</span>
+                    }
+                </td>
+
+                
+                <td>
+                    @if (user.IsActive)
+                    {
+                        <span class="text-success">啟用中</span>
+                    }
+                    else
+                    {
+                        <span class="text-danger">已停用</span>
+                    }
+                </td>
+                <td>
+                    <a asp-action="EditUser" asp-route-id="@user.Id" class="btn btn-sm btn-warning">編輯</a>
+                    <a asp-action="DeleteUser" asp-route-id="@user.Id" class="btn btn-sm btn-danger">刪除</a>
+                    <form asp-action="ToggleUserActive" asp-route-id="@user.Id" method="post" style="display:inline;">
+                        <button class="btn btn-sm @(user.IsActive ? "btn-outline-secondary" : "btn-outline-success")">
+                            @(user.IsActive ? "停用" : "啟用")
+                        </button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

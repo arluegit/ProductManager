@@ -1,0 +1,35 @@
+﻿@{
+    ViewData["Title"] = "註冊帳號";
+    var returnUrl = ViewData["ReturnUrl"] as string ?? "/";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<form asp-action="Register" method="post">
+    <input type="hidden" name="returnUrl" value="@returnUrl" />
+    <div class="mb-3">
+        <label>帳號：</label>
+        <input type="text" name="username" required class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label>密碼：</label>
+        <input type="password" name="password" required class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label>確認密碼：</label>
+        <input type="password" name="confirmPassword" required class="form-control" />
+    </div>
+    <button type="submit" class="btn btn-primary">註冊</button>
+</form>
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="text-danger mt-3">
+        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+        {
+            <p>@error.ErrorMessage</p>
+        }
+    </div>
+}
+
+<p>已經有帳號？<a asp-action="Login" asp-controller="Account">立即登入</a></p>

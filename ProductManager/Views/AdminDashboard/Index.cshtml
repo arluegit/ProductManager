@@ -1,0 +1,60 @@
+﻿@{
+    ViewData["Title"] = "後台總覽";
+    var users = (List<ProductManager.Models.User>)ViewBag.RecentUsers;
+}
+
+<h2 class="mb-4">後台總覽</h2>
+
+<div class="row">
+    <div class="col-md-3">
+        <div class="card text-white bg-primary mb-3">
+            <div class="card-body">
+                <h5 class="card-title">使用者總數</h5>
+                <p class="card-text display-6">@ViewBag.TotalUsers 人</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-success mb-3">
+            <div class="card-body">
+                <h5 class="card-title">啟用使用者</h5>
+                <p class="card-text display-6">@ViewBag.ActiveUsers 人</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-warning mb-3">
+            <div class="card-body">
+                <h5 class="card-title">商品總數</h5>
+                <p class="card-text display-6">@ViewBag.TotalProducts 件</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-info mb-3">
+            <div class="card-body">
+                <h5 class="card-title">分類總數</h5>
+                <p class="card-text display-6">@ViewBag.TotalCategories 個</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h4 class="mt-4">最新註冊使用者</h4>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>帳號</th>
+            <th>狀態</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in users)
+        {
+            <tr>
+                <td>@user.Username</td>
+                <td>@(user.IsActive ? "啟用" : "停用")</td>
+            </tr>
+        }
+    </tbody>
+</table>

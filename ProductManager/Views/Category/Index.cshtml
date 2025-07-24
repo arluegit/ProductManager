@@ -1,0 +1,36 @@
+﻿@model IEnumerable<ProductManager.Models.Category>
+
+@{
+    ViewData["Title"] = "分類列表";
+}
+
+<h1>分類管理</h1>
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["Error"]
+    </div>
+}
+
+<a asp-action="Create" class="btn btn-primary mb-3">新增分類</a>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>分類名稱</th>
+            <th>操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var category in Model)
+        {
+            <tr>
+                <td>@category.Name</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@category.Id" class="btn btn-sm btn-warning me-1">編輯</a>
+                    <a asp-action="Delete" asp-route-id="@category.Id" class="btn btn-sm btn-danger">刪除</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

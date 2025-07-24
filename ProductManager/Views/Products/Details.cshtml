@@ -1,0 +1,51 @@
+﻿@model ProductManager.Models.Product
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>Product</h4>
+    <hr />
+    <dl class="row">
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Name)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Name)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Price)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Price)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Quantity)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Quantity)
+        </dd>
+        <dt class="col-sm-2">建立時間</dt>
+        <dd class="col-sm-10">@Model.CreatedDate.ToString("yyyy-MM-dd HH:mm:ss")</dd>
+        <dt class="col-sm-2">商品圖片</dt>
+        <dd class="col-sm-10">
+            @if (!string.IsNullOrEmpty(Model.ImagePath))
+            {
+                <img src="@Url.Content("~/uploads/" + Model.ImagePath)" alt="商品圖片" style="max-width:200px;" />
+            }
+            else
+            {
+                <span class="text-muted">尚未上傳圖片</span>
+            }
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>
+
+

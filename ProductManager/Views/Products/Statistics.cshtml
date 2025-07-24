@@ -1,0 +1,76 @@
+﻿@{
+    ViewData["Title"] = "商品統計";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<!-- 年份下拉選單 -->
+<div class="mb-3">
+    <label for="yearSelect">選擇年份：</label>
+    <select id="yearSelect" class="form-select" style="width: 150px; display: inline-block;">
+      @for (int y = DateTime.Now.Year - 5; y <= DateTime.Now.Year; y++)
+        {
+            var selected = y == DateTime.Now.Year ? "selected" : "";
+            @: <option value="@y" @selected>@y 年</option>
+        }
+    </select>
+</div>
+
+<!-- 圖表畫布 -->
+<canvas id="myChart" width="800" height="400"></canvas>
+
+<!-- 載入 Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    let chart; // 全域 chart 實例
+
+    async function fetchData(year) {
+        const response = await fetch(`/Products/GetMonthlyProductCount?year=${year}`);
+        return await response.json();
+    }
+
+    async function renderChart(year) {
+        const monthlyData = await fetchData(year);
+        const ctx = document.getElementById('myChart').getContext('2d');
+
+        if (chart) {
+            chart.destroy();
+        }
+
+        chart = new Chart(ctx, {
+            type: 'bar', // 可改成 'line' 等
+            data: {
+                labels: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
+                datasets: [{
+                    label: `${year} 年每月商品數量`,
+                    data: monthlyData,
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // 下拉選單改變時更新圖表
+    document.getElementById('yearSelect').addEventListener('change', function () {
+        renderChart(this.value);
+    });
+
+    // 頁面載入時，預設顯示當前年份圖表
+    window.onload = function () {
+        const initialYear = document.getElementById('yearSelect').value;
+        renderChart(initialYear);
+    };
+</script>

@@ -1,0 +1,66 @@
+﻿@model ProductManager.Models.User
+@using System.Security.Claims
+@{
+    ViewData["Title"] = "編輯帳號";
+    var allRoles = ViewBag.AllRoles as List<ProductManager.Models.Role>;
+    var isAdmin = User.IsInRole("Admin");
+    var isSelf = User.Identity?.Name == Model.Username;
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<!-- 成功訊息 -->
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success">@TempData["Message"]</div>
+}
+
+<!-- 錯誤提示 -->
+@Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+<form asp-action="EditUser" method="post">
+    <input type="hidden" name="id" value="@Model.Id" />
+
+    <div class="mb-3">
+        <label>使用者名稱</label>
+        @if (isAdmin)
+        {
+            <input name="username" value="@Model.Username" class="form-control" />
+        }
+        else
+        {
+            <input name="username" value="@Model.Username" class="form-control" readonly />
+        }
+    </div>
+
+    @if (isAdmin)
+    {
+        <div class="mb-3">
+            <label>角色</label><br />
+            @foreach (var role in allRoles)
+            {
+                var isChecked = Model.UserRoles.Any(ur => ur.RoleId == role.Id);
+                <label class="me-2">
+                    <input type="checkbox" name="selectedRoleIds" value="@role.Id" @(isChecked ? "checked" : "") />
+                    @role.Name
+                </label>
+            }
+        </div>
+    }
+
+    @if (isAdmin || isSelf)
+    {
+        <div class="mb-3">
+            <label>新密碼（選填）</label>
+            <input type="password" name="newPassword" class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label>確認新密碼</label>
+            <input type="password" name="confirmPassword" class="form-control" />
+        </div>
+    }
+
+    <button type="submit" class="btn btn-primary">儲存</button>
+    <a asp-action="UserList" class="btn btn-secondary">取消</a>
+</form>

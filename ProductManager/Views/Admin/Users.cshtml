@@ -1,0 +1,30 @@
+﻿@model IEnumerable<ProductManager.Models.User>
+
+@{
+    ViewData["Title"] = "帳號管理";
+}
+
+<h1>帳號管理</h1>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>帳號</th>
+            <th>角色</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            <tr>
+                <td>@user.Username</td>
+                <td>
+                    @foreach (var role in user.UserRoles.Select(ur => ur.Role.Name))
+                    {
+                        <span class="badge bg-secondary">@role</span>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

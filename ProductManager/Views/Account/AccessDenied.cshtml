@@ -1,0 +1,11 @@
+﻿@{
+    ViewData["Title"] = "拒絕存取";
+}
+
+<h2>拒絕存取</h2>
+<p>您沒有權限存取此頁面。</p>
+
+@if (ViewData["ReturnUrl"] != null)
+{
+    <p><a href="@Url.Action("Index", "Home")">返回首頁</a></p>
+}

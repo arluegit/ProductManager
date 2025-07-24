@@ -1,0 +1,17 @@
+﻿@model ProductManager.Models.Category
+
+@{
+    ViewData["Title"] = "刪除分類";
+}
+
+<h2>確定要刪除此分類？</h2>
+
+<div>
+    <h4>分類名稱：@Model.Name</h4>
+
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="Id" />
+        <button type="submit" class="btn btn-danger">刪除</button>
+        <a asp-action="Index" class="btn btn-secondary">取消</a>
+    </form>
+</div>

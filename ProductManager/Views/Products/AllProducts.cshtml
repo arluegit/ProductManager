@@ -1,0 +1,31 @@
+﻿@model List<ProductManager.Models.Product>
+
+
+@{
+    ViewData["Title"] = "商品種類";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Price(NT$   )</th>
+            <th>Quantity</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Name</td>
+                <td>@($"{item.Price:N0}")</td>
+                <td>@item.Quantity</td>
+
+            </tr>
+        }
+    </tbody>
+</table>
+
+

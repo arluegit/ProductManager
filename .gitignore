@@ -1,0 +1,12 @@
+# Build files
+bin/
+obj/
+.vs/
+*.user
+*.suo
+
+# Publish folders
+wwwroot/
+
+# Rider & JetBrains
+.idea/

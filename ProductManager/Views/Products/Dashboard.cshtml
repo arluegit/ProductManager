@@ -1,0 +1,42 @@
+﻿@{
+    ViewData["Title"] = "管理者總覽 Dashboard";
+    var recent = (List<ProductManager.Models.Product>)ViewBag.RecentProducts;
+}
+
+<h2>管理者總覽</h2>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card text-bg-primary p-3">
+            <h5>產品總數</h5>
+            <h2>@ViewBag.TotalProducts</h2>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-bg-success p-3">
+            <h5>分類總數</h5>
+            <h2>@ViewBag.TotalCategories</h2>
+        </div>
+    </div>
+</div>
+
+<h4>近期新增產品</h4>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>名稱</th>
+            <th>分類</th>
+            <th>建立時間</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var p in recent)
+        {
+            <tr>
+                <td>@p.Name</td>
+                <td>@p.Category?.Name</td>
+                <td>@p.CreatedDate.ToString("yyyy-MM-dd")</td>
+            </tr>
+        }
+    </tbody>
+</table>
