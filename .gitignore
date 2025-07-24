@@ -1,12 +1,16 @@
-# Build files
-bin/
-obj/
+# Visual Studio
 .vs/
 *.user
 *.suo
 
-# Publish folders
-wwwroot/
+# Build results
+bin/
+obj/
 
-# Rider & JetBrains
+# Rider
 .idea/
+
+# User-specific files
+*.rsuser
+*.userosscache
+*.sln.docstates
