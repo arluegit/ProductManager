@@ -1,4 +1,10 @@
 ﻿@model IEnumerable<ProductManager.Models.Product>
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-info">
+        @TempData["Message"]
+    </div>
+}
 
 
 @{
@@ -23,8 +29,22 @@
             </select>
 
         </div>
+        <br />
+        <!-- 新增最低價 -->
         <div class="col-md-2">
-            <button type="submit" class="btn btn-primary">篩選</button>
+            <input type="number" name="minPrice" class="form-control" placeholder="最低價" value="@ViewBag.MinPrice" />
+        </div>
+
+        <!-- 新增最高價 -->
+        <div class="col-md-2">
+            <input type="number" name="maxPrice" class="form-control" placeholder="最高價" value="@ViewBag.MaxPrice" />
+        </div>
+        <br />
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary">搜尋</button>
+        </div>
+        <div class="col-md-2">
+            <a asp-action="Index" class="btn btn-secondary w-100">清除</a>
         </div>
     </div>
 </form>
@@ -38,6 +58,7 @@
             <th>@Html.DisplayNameFor(model => model.Category)</th>
             @if (User.Identity?.Name == "Admin"){
             <th>操作</th>
+            <th>上下架狀態</th>
             }
         </tr>
     </thead>
@@ -64,13 +85,29 @@
                 @if (User.Identity?.Name == "Admin")
                 {
                     <td>
-                   
-                        <a asp-action="Edit" asp-route-id="@item.Id">編輯</a> 
-                        <a asp-action="Details" asp-route-id="@item.Id">詳細</a> 
-                        <a asp-action="Delete" asp-route-id="@item.Id">刪除</a>
 
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-success me-1">編輯</a>
+                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-primary text-white me-1">詳細</a>
+                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">刪除</a>
+                        <form asp-action="ToggleActive" method="post" style="display:inline">
+                            <input type="hidden" name="id" value="@item.Id" />
+                            <button type="submit" class="btn btn-sm @(item.IsAvailable ? "btn-warning" : "btn-success")">
+                                @(item.IsAvailable ? "下架" : "上架")
+                            </button>
+                        </form>
                     </td>
                 }
+                <!-- 狀態 -->
+                <td>
+                    @if (item.IsAvailable)
+                    {
+                        <span class="badge bg-success">上架中</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">已下架</span>
+                    }
+                </td>
             </tr>
         }
     </tbody>

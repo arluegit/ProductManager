@@ -27,7 +27,7 @@
 
 
             [AllowAnonymous]
-            public async Task<IActionResult> Index(string? keyword, int? categoryId, int page = 1)
+            public async Task<IActionResult> Index(string? keyword, int? categoryId, int? minPrice, int? maxPrice, int page = 1)
             {
                 int pageSize = 5;
 
@@ -35,16 +35,29 @@
                     .Include(p => p.Category)
                     .AsQueryable();
 
+                // 關鍵字搜尋
                 if (!string.IsNullOrWhiteSpace(keyword))
                 {
                     query = query.Where(p => p.Name.Contains(keyword));
                 }
 
+                // 分類篩選
                 if (categoryId != null && categoryId > 0)
                 {
                     query = query.Where(p => p.CategoryId == categoryId);
                 }
 
+                // 加價格區間搜尋
+                if (minPrice.HasValue)
+                {
+                    query = query.Where(p => p.Price >= minPrice.Value);
+                }
+                if (maxPrice.HasValue)
+                {
+                    query = query.Where(p => p.Price <= maxPrice.Value);
+                }
+
+                // 分頁
                 int totalCount = await query.CountAsync();
                 int totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
 
@@ -54,21 +67,20 @@
                     .Take(pageSize)
                     .ToListAsync();
 
-                // 加入分類清單供 View 顯示
+                // ViewBag 資料
                 var category = await _context.Category.ToListAsync();
-                //ViewBag.Category= new SelectList(category, "Id", "Name");
                 ViewBag.Category = new SelectList(category, "Id", "Name", categoryId);
                 ViewBag.SelectedCategoryId = categoryId;
                 ViewBag.CurrentPage = page;
                 ViewBag.TotalPages = totalPages;
                 ViewBag.Keyword = keyword;
-                //var categoryList = await _context.Category.ToListAsync();
-                //ViewBag.Category = new SelectList(categoryList, "Id", "Name", categoryId);
-                //ViewBag.SelectedCategoryId = categoryId;
+                ViewBag.MinPrice = minPrice;
+                ViewBag.MaxPrice = maxPrice;
+
                 return View(products);
             }
 
-            [AllowAnonymous]
+        [AllowAnonymous]
                 public async Task<IActionResult> Details(int? id)
                 {
                     if (id == null) return NotFound();
