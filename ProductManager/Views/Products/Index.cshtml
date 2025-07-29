@@ -20,16 +20,16 @@
 
 <form asp-action="Index" method="get" class="mb-3">
     <div class="row g-2 align-items-center">
-        <div class="col-md-4">
-            <input type="text" name="keyword" value="@ViewBag.Keyword" class="form-control" placeholder="搜尋產品名稱...">
-        </div>
+        
         <div class="col-md-4">
             <select name="categoryId" class="form-select" asp-items="ViewBag.Category">
                 <option value="">-- 所有分類 --</option>
             </select>
-
         </div>
-        <br />
+        <div class="col-md-4">
+            <input type="text" name="keyword" value="@ViewBag.Keyword" class="form-control" placeholder="搜尋產品名稱...">
+        </div>
+       
         <!-- 新增最低價 -->
         <div class="col-md-2">
             <input type="number" name="minPrice" class="form-control" placeholder="最低價" value="@ViewBag.MinPrice" />
@@ -39,12 +39,11 @@
         <div class="col-md-2">
             <input type="number" name="maxPrice" class="form-control" placeholder="最高價" value="@ViewBag.MaxPrice" />
         </div>
-        <br />
+        
         <div class="col-md-2">
             <button type="submit" class="btn btn-primary">搜尋</button>
-        </div>
-        <div class="col-md-2">
-            <a asp-action="Index" class="btn btn-secondary w-100">清除</a>
+        
+            <a asp-action="Index" class="btn btn-secondary">清除</a>
         </div>
     </div>
 </form>
@@ -88,7 +87,11 @@
 
                         <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-success me-1">編輯</a>
                         <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-primary text-white me-1">詳細</a>
-                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">刪除</a>
+                        <!--<a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">刪除</a>-->
+                        <button type="button" class="btn btn-sm btn-danger btn-delete" data-id="@item.Id">
+                            刪除
+                        </button>
+
                         <form asp-action="ToggleActive" method="post" style="display:inline">
                             <input type="hidden" name="id" value="@item.Id" />
                             <button type="submit" class="btn btn-sm @(item.IsAvailable ? "btn-warning" : "btn-success")">
@@ -127,6 +130,28 @@
         </ul>
     </nav>
 </div>
+@section Scripts {
+    <script>
+        $(document).on("click", ".btn-delete", function () {
+            const id = $(this).data("id");
+
+            Swal.fire({
+                title: "確定要刪除嗎？",
+                text: "刪除後資料將無法恢復！",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#d33",
+                cancelButtonColor: "#3085d6",
+                confirmButtonText: "是的，刪除！",
+                cancelButtonText: "取消"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = `/Products/Delete/${id}`;
+                }
+            });
+        });
+    </script>
+}
 
 
 

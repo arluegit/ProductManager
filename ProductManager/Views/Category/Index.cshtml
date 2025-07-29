@@ -28,9 +28,38 @@
                 <td>@category.Name</td>
                 <td>
                     <a asp-action="Edit" asp-route-id="@category.Id" class="btn btn-sm btn-warning me-1">編輯</a>
-                    <a asp-action="Delete" asp-route-id="@category.Id" class="btn btn-sm btn-danger">刪除</a>
+                    <!--<a asp-action="Delete" asp-route-id="@category.Id" class="btn btn-sm btn-danger">刪除</a>-->
+                    <button type="button" class="btn btn-sm btn-danger btn-delete" data-id="@category.Id">
+                        刪除
+                    </button>
                 </td>
             </tr>
         }
     </tbody>
 </table>
+
+@section Scripts {
+    <script>
+        $(document).on("click", ".btn-delete", function () {
+            const id = $(this).data("id");
+
+            Swal.fire({
+                title: "確定要刪除嗎？",
+                text: "刪除後資料將無法恢復！",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#d33",
+                cancelButtonColor: "#3085d6",
+                confirmButtonText: "是的，刪除！",
+                cancelButtonText: "取消"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = `/Products/Delete/${id}`;
+                }
+            });
+        });
+    </script>
+}
+
+
+

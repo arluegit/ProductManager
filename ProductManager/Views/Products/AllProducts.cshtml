@@ -5,11 +5,21 @@
     ViewData["Title"] = "商品種類";
 }
 
+<style>
+    table.table-bordered th,
+    table.table-bordered td {
+        text-align: center;
+        vertical-align: middle;
+    }
+
+</style>
+
 <h2>@ViewData["Title"]</h2>
 
 <table class="table table-bordered">
     <thead>
         <tr>
+            <th>圖片</th>
             <th>Name</th>
             <th>Price(NT$   )</th>
             <th>Quantity</th>
@@ -19,6 +29,16 @@
         @foreach (var item in Model)
         {
             <tr>
+                <td>
+                    @if (!string.IsNullOrEmpty(item.ImagePath))
+                    {                     
+                        <img src="@Url.Content("~/uploads/" + item.ImagePath)" alt="商品圖片" style="width:80px; height:auto;" />
+                    }
+                    else
+                    {
+                        <span>無圖片</span>
+                    }
+                </td>
                 <td>@item.Name</td>
                 <td>@($"{item.Price:N0}")</td>
                 <td>@item.Quantity</td>
