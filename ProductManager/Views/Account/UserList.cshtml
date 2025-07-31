@@ -55,10 +55,7 @@
                 </td>
                 <td>
                     <a asp-action="EditUser" asp-route-id="@user.Id" class="btn btn-sm btn-warning">編輯</a>
-                    <!--<a asp-action="DeleteUser" asp-route-id="@user.Id" class="btn btn-sm btn-danger">刪除</a>-->
-                    <button type="button" class="btn btn-sm btn-danger btn-delete" data-id="@user.Id">
-                        刪除
-                    </button>
+                    <a asp-action="DeleteUser" asp-route-id="@user.Id" class="btn btn-sm btn-danger">刪除</a>
 
                     <form asp-action="ToggleUserActive" asp-route-id="@user.Id" method="post" style="display:inline;">
                         <button class="btn btn-sm @(user.IsActive ? "btn-outline-secondary" : "btn-outline-success")">
@@ -70,27 +67,6 @@
         }
     </tbody>
 </table>
-@section Scripts {
-    <script>
-        $(document).on("click", ".btn-delete", function () {
-            const id = $(this).data("id");
 
-            Swal.fire({
-                title: "確定要刪除嗎？",
-                text: "刪除後資料將無法恢復！",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#d33",
-                cancelButtonColor: "#3085d6",
-                confirmButtonText: "是的，刪除！",
-                cancelButtonText: "取消"
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    window.location.href = `/Products/Delete/${id}`;
-                }
-            });
-        });
-    </script>
-}
 
 

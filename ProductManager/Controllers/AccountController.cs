@@ -236,7 +236,8 @@ public class AccountController : Controller
                 return View(user);
             }
 
-            user.Password = newPassword; // 實務上建議加密儲存
+            user.Password = PasswordHelper.HashPassword(newPassword);//複雜密碼
+
         }
 
         await _context.SaveChangesAsync();
@@ -301,11 +302,12 @@ public class AccountController : Controller
         if (user == null)
             return NotFound();
 
-        if (user.Password != currentPassword)
+        if (user.Password != PasswordHelper.HashPassword(currentPassword))
         {
             ModelState.AddModelError("", "當前密碼錯誤");
             return View();
         }
+
 
         if (string.IsNullOrWhiteSpace(newPassword) || newPassword != confirmPassword)
         {

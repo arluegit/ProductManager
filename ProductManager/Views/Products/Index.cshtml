@@ -13,7 +13,7 @@
 
 <h1>@ViewData["Title"]</h1>
 
-@if (User.Identity?.Name == "Admin")
+@if (User.IsInRole("Admin"))
 {
     <a asp-action="Create" class="btn btn-primary mb-3">新增商品</a>
 }
