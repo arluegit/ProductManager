@@ -246,6 +246,9 @@ public class AccountController : Controller
         return RedirectToAction("UserList");
     }
 
+    /*使用SweetAlert 刪除確認框基本
+     //因修改View 中改用 AJAX 刪除，且無法共用所以這一段先註解
+
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> DeleteUser(int id)
     {
@@ -272,6 +275,32 @@ public class AccountController : Controller
 
         TempData["Message"] = "刪除成功";
         return RedirectToAction("UserList");
+    }
+    */
+    /*View 中改用 AJAX 刪除*/
+    [HttpPost]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> DeleteUser(int id)
+    {
+        var user = await _context.Users
+            .Include(u => u.UserRoles)
+            .FirstOrDefaultAsync(u => u.Id == id);
+
+        if (user == null)
+        {
+            return Json(new { success = false, message = "找不到使用者" });
+        }
+
+        if (user.Username == User.Identity?.Name)
+        {
+            return Json(new { success = false, message = "無法刪除自己" });
+        }
+
+        _context.UserRoles.RemoveRange(user.UserRoles);
+        _context.Users.Remove(user);
+        await _context.SaveChangesAsync();
+
+        return Json(new { success = true });
     }
 
     [Authorize]

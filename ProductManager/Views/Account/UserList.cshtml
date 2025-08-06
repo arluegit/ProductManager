@@ -84,6 +84,7 @@
         }
     </tbody>
 </table>
+@*使用SweetAlert 刪除確認框基本
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
@@ -110,5 +111,53 @@
         });
     </script>
 }
+*@
+
+<!--View 中改用 AJAX 刪除-->
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        $(document).ready(function () {
+            $('.delete-user-btn').click(function () {
+                const userId = $(this).data('id');
+                const button = $(this); // 為了後面移除該列
+
+                Swal.fire({
+                    title: '確定要刪除這個帳號嗎？',
+                    text: "此操作無法還原！",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: '是的，刪除',
+                    cancelButtonText: '取消'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '/Account/DeleteUser',
+                            type: 'POST',
+                            data: { id: userId },
+                            success: function (res) {
+                                if (res.success) {
+                                    Swal.fire('刪除成功', '', 'success');
+                                    // 移除該筆使用者所在的 tr
+                                    button.closest('tr').remove();
+                                } else {
+                                    Swal.fire('刪除失敗', res.message, 'error');
+                                }
+                            },
+                            error: function () {
+                                Swal.fire('發生錯誤', '請稍後再試', 'error');
+                            }
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+}
+
+
+
 
 
