@@ -253,7 +253,11 @@ public class AccountController : Controller
             .Include(u => u.UserRoles)
             .FirstOrDefaultAsync(u => u.Id == id);
 
-        if (user == null) return NotFound();
+        if (user == null)
+        {
+            TempData["Error"] = "找不到使用者";
+            return RedirectToAction("UserList");
+        }
 
         // 不能刪除自己
         if (user.Username == User.Identity?.Name)
@@ -262,10 +266,11 @@ public class AccountController : Controller
             return RedirectToAction("UserList");
         }
 
-        _context.UserRoles.RemoveRange(user.UserRoles); // 清除角色
-        _context.Users.Remove(user); // 刪除帳號
+        _context.UserRoles.RemoveRange(user.UserRoles);
+        _context.Users.Remove(user);
         await _context.SaveChangesAsync();
 
+        TempData["Message"] = "刪除成功";
         return RedirectToAction("UserList");
     }
 
