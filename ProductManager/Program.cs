@@ -16,7 +16,12 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     .AddCookie(options =>
     {
         options.LoginPath = "/Account/Login"; // 未登入自動跳轉登入頁
-    });     
+    });
+
+
+// 設定 Session 要在builder.Build();之前
+builder.Services.AddSession();
+
 
 var app = builder.Build();
 
@@ -37,6 +42,7 @@ app.UseRouting();
 // **身份驗證中介軟體要放在 UseAuthorization 前**
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseSession(); // 啟用 Session 支援
 
 app.MapControllerRoute(
     name: "default",
@@ -63,3 +69,4 @@ app.Run();
 
 //cd D:\source\repos\ProductManager\ProductManager
 //dotnet ef database update
+

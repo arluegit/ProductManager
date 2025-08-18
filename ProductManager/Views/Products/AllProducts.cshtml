@@ -1,28 +1,16 @@
 ﻿@model List<ProductManager.Models.Product>
 
-
-@{
-    ViewData["Title"] = "商品種類";
-}
-
-<style>
-    table.table-bordered th,
-    table.table-bordered td {
-        text-align: center;
-        vertical-align: middle;
-    }
-
-</style>
-
-<h2>@ViewData["Title"]</h2>
+<h2>商品種類</h2>
 
 <table class="table table-bordered">
     <thead>
         <tr>
             <th>圖片</th>
             <th>Name</th>
-            <th>Price(NT$   )</th>
-            <th>Quantity</th>
+            <th>Price(NT$)</th>
+            <th>庫存</th>
+            <th>數量</th>
+            <th>加入購物車</th>
         </tr>
     </thead>
     <tbody>
@@ -31,7 +19,7 @@
             <tr>
                 <td>
                     @if (!string.IsNullOrEmpty(item.ImagePath))
-                    {                     
+                    {
                         <img src="@Url.Content("~/uploads/" + item.ImagePath)" alt="商品圖片" style="width:80px; height:auto;" />
                     }
                     else
@@ -41,11 +29,49 @@
                 </td>
                 <td>@item.Name</td>
                 <td>@($"{item.Price:N0}")</td>
-                <td>@item.Quantity</td>
-
+                <td id="stock_@item.Id">@item.Quantity</td>
+                <td>
+                    <input type="number" name="quantity_@item.Id" id="quantity_@item.Id" value="1" min="1" max="@item.Quantity" style="width:60px;" />
+                </td>
+                <td>
+                    <button class="btn btn-primary add-to-cart" data-id="@item.Id">加入購物車</button>
+                </td>
             </tr>
         }
     </tbody>
 </table>
 
+<a asp-controller="Cart" asp-action="Index" class="btn btn-success">查看購物車</a>
 
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(function () {
+            $('.add-to-cart').click(function () {
+                var productId = $(this).data('id');
+                var quantity = parseInt($('#quantity_' + productId).val());
+                var stock = parseInt($('#stock_' + productId).text());
+
+                if (quantity > stock) {
+                    alert('數量超過庫存，請重新選擇！');
+                    return;
+                }
+
+                $.ajax({
+                    url: '@Url.Action("AddToCartAjax", "Cart")',
+                    type: 'POST',
+                    data: { id: productId, quantity: quantity },
+                    success: function (res) {
+                        if (res.success) {
+                            alert('已加入購物車！');
+                            // 更新剩餘庫存
+                            $('#stock_' + productId).text(stock - quantity);
+                            $('#quantity_' + productId).attr('max', stock - quantity);
+                            $('#quantity_' + productId).val(1); // 重置輸入框
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+}
