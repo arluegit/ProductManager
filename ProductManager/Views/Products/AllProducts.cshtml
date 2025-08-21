@@ -31,17 +31,31 @@
                 <td>@($"{item.Price:N0}")</td>
                 <td id="stock_@item.Id">@item.Quantity</td>
                 <td>
-                    <input type="number" name="quantity_@item.Id" id="quantity_@item.Id" value="1" min="1" max="@item.Quantity" style="width:60px;" />
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <input type="number" name="quantity_@item.Id" id="quantity_@item.Id" value="1" min="1" max="@item.Quantity" style="width:60px;" />
+                    }
+                    else
+                    {
+                        @item.Quantity
+                    }
                 </td>
                 <td>
-                    <button class="btn btn-primary add-to-cart" data-id="@item.Id">加入購物車</button>
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <button class="btn btn-primary add-to-cart" data-id="@item.Id">加入購物車</button>
+                    }
+                    else
+                    {
+                        <span class="text-muted">請登入購買</span>
+                    }
                 </td>
             </tr>
         }
     </tbody>
 </table>
 
-<a asp-controller="Cart" asp-action="Index" class="btn btn-success">查看購物車</a>
+<!--<a asp-controller="Cart" asp-action="Index" class="btn btn-success">查看購物車</a>-->
 
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -68,6 +82,8 @@
                             $('#stock_' + productId).text(stock - quantity);
                             $('#quantity_' + productId).attr('max', stock - quantity);
                             $('#quantity_' + productId).val(1); // 重置輸入框
+                        } else {
+                            alert(res.message);
                         }
                     }
                 });
@@ -75,3 +91,4 @@
         });
     </script>
 }
+

@@ -80,11 +80,11 @@
                                 <a class="nav-link text-dark" asp-controller="AdminDashboard" asp-action="Index">後台總覽</a>
                             </li>
                         }
-
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Cart" asp-action="Index">購物車</a>
-                        </li>
-
+                        @if (User.Identity?.IsAuthenticated == true){
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Cart" asp-action="Index">購物車</a>
+                            </li>
+                        }
 
                     </ul>
                 </div>

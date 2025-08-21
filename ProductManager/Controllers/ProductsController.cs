@@ -276,7 +276,7 @@
                     return Json(data);
                 }
 
-                [HttpGet]
+                [AllowAnonymous]
                 public IActionResult AllProducts()
                 {
                     var products = _context.Products

@@ -111,17 +111,39 @@ namespace ProductManager.Controllers
             return Json(new { success = true, itemTotal, totalAmount });
         }
         [HttpPost]
+        
+
+
+        public IActionResult Clear()
+        {
+            HttpContext.Session.Remove("Cart"); // 移除購物車 Session
+            return RedirectToAction("Index");   // 清空後回購物車頁面
+        }
+
+
+        [HttpPost]
         public IActionResult AddToCartAjax(int id, int quantity)
         {
             var product = _context.Products.Find(id);
-            if (product == null) return Json(new { success = false });
+            if (product == null)
+                return Json(new { success = false, message = "商品不存在" });
+
+            if (quantity <= 0)
+                return Json(new { success = false, message = "數量必須大於 0" });
+
+            if (quantity > product.Quantity)
+                return Json(new { success = false, message = $"庫存不足，剩餘 {product.Quantity}" });
 
             var cart = HttpContext.Session.GetObject<List<CartItem>>(CartSessionKey) ?? new List<CartItem>();
             var cartItem = cart.FirstOrDefault(c => c.ProductId == id);
 
             if (cartItem != null)
             {
-                cartItem.Quantity += quantity; // 加上選擇數量
+                if (cartItem.Quantity + quantity > product.Quantity)
+                {
+                    return Json(new { success = false, message = $"庫存不足，剩餘 {product.Quantity}" });
+                }
+                cartItem.Quantity += quantity;
             }
             else
             {
@@ -136,16 +158,7 @@ namespace ProductManager.Controllers
 
             HttpContext.Session.SetObject(CartSessionKey, cart);
 
-            var totalAmount = cart.Sum(c => c.Price * c.Quantity);
-
-            return Json(new { success = true, totalAmount });
-        }
-
-
-        public IActionResult Clear()
-        {
-            HttpContext.Session.Remove("Cart"); // 移除購物車 Session
-            return RedirectToAction("Index");   // 清空後回購物車頁面
+            return Json(new { success = true });
         }
 
     }
