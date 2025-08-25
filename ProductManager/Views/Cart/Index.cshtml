@@ -12,6 +12,7 @@ else
     <table class="table">
         <thead>
             <tr>
+                <th>圖片</th>
                 <th>商品</th>
                 <th>單價</th>
                 <th>數量</th>
@@ -23,10 +24,19 @@ else
             @foreach (var item in Model)
             {
                 <tr data-id="@item.ProductId">
+                    <td>
+                        @if (!string.IsNullOrEmpty(item.ImagePath))
+                        {
+                            <img src="@Url.Content("~/uploads/" + item.ImagePath)"
+                                 alt="商品圖片"
+                                 style="width:60px; height:auto; margin-right:10px;" />
+                        }
+                        <span>@item.Name</span>
+                    </td>
                     <td>@item.Name</td>
                     <td>@item.Price.ToString("C0", CultureInfo.CreateSpecificCulture("zh-TW"))</td>
                     <td>
-                        <input type="number" class="quantity-input" value="@item.Quantity" min="0" style="width:60px;" />
+                        <input type="number" class="quantity-input" value="@item.Quantity" min="0" max="@item.Stock" style="width:60px;" />
                     </td>
                     <td class="item-total">@((item.Price * item.Quantity).ToString("C0", CultureInfo.CreateSpecificCulture("zh-TW")))</td>
                     <td>
@@ -44,11 +54,23 @@ else
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        $(function () {
+                $(function () {
             $('.quantity-input').on('change', function () {
                 var row = $(this).closest('tr');
                 var id = row.data('id');
-                var quantity = $(this).val();
+                var quantity = parseInt($(this).val());
+                var maxStock = parseInt($(this).attr('max'));
+
+                // 防止超過庫存或負數
+                if (quantity > maxStock) {
+                    alert('數量超過庫存上限！');
+                    $(this).val(maxStock);
+                    quantity = maxStock;
+                }
+                if (quantity < 0 || isNaN(quantity)) {
+                    $(this).val(1);
+                    quantity = 1;
+                }
 
                 $.ajax({
                     url: '@Url.Action("UpdateQuantityAjax", "Cart")',
@@ -58,10 +80,14 @@ else
                         if (res.success) {
                             row.find('.item-total').text('NT$' + res.itemTotal.toFixed(0));
                             $('#totalAmount').text('NT$' + res.totalAmount.toFixed(0));
+                        } else {
+                            alert(res.message);
+                            location.reload();
                         }
                     }
                 });
             });
         });
+
     </script>
 }

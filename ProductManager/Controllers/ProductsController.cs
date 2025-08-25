@@ -280,7 +280,7 @@
                 public IActionResult AllProducts()
                 {
                     var products = _context.Products
-                        .Where(p => p.IsAvailable) // ✅ 只抓上架產品
+                        .Where(p => p.IsAvailable) //   只抓上架產品
                         .ToList();
                     return View(products);
                 }

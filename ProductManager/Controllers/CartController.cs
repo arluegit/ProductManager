@@ -40,7 +40,8 @@ namespace ProductManager.Controllers
                     ProductId = product.Id,
                     Name = product.Name,
                     Price = product.Price,
-                    Quantity = 1
+                    Quantity = 1,
+                    ImagePath = product.ImagePath // ← 加這個
                 });
             }
 
@@ -92,15 +93,27 @@ namespace ProductManager.Controllers
         [HttpPost]
         public IActionResult UpdateQuantityAjax(int id, int quantity)
         {
+            var product = _context.Products.Find(id);
+            if (product == null)
+                return Json(new { success = false, message = "商品不存在" });
+
             var cart = HttpContext.Session.GetObject<List<CartItem>>(CartSessionKey) ?? new List<CartItem>();
             var item = cart.FirstOrDefault(c => c.ProductId == id);
 
             if (item != null)
             {
                 if (quantity <= 0)
+                {
                     cart.Remove(item);
+                }
+                else if (quantity > product.Quantity)
+                {
+                    return Json(new { success = false, message = $"庫存不足，剩餘 {product.Quantity}" });
+                }
                 else
+                {
                     item.Quantity = quantity;
+                }
 
                 HttpContext.Session.SetObject(CartSessionKey, cart);
             }
@@ -110,13 +123,13 @@ namespace ProductManager.Controllers
 
             return Json(new { success = true, itemTotal, totalAmount });
         }
-        [HttpPost]
+        
         
 
 
         public IActionResult Clear()
         {
-            HttpContext.Session.Remove("Cart"); // 移除購物車 Session
+            HttpContext.Session.Remove(CartSessionKey);  // 移除購物車 Session
             return RedirectToAction("Index");   // 清空後回購物車頁面
         }
 
@@ -143,6 +156,7 @@ namespace ProductManager.Controllers
                 {
                     return Json(new { success = false, message = $"庫存不足，剩餘 {product.Quantity}" });
                 }
+                
                 cartItem.Quantity += quantity;
             }
             else
@@ -152,14 +166,18 @@ namespace ProductManager.Controllers
                     ProductId = product.Id,
                     Name = product.Name,
                     Price = product.Price,
-                    Quantity = quantity
+                    Quantity = quantity,
+                    ImagePath = product.ImagePath,
+                    Stock = product.Quantity
                 });
-            }
+            }        
 
             HttpContext.Session.SetObject(CartSessionKey, cart);
 
             return Json(new { success = true });
         }
+
+
 
     }
 }
