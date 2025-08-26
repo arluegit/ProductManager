@@ -178,6 +178,59 @@ namespace ProductManager.Controllers
         }
 
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Checkout(string customerName)
+        {
+            var cart = HttpContext.Session.GetObject<List<CartItem>>(CartSessionKey) ?? new List<CartItem>();
+            if (!cart.Any()) return RedirectToAction("Index", "Cart");
+
+            // 訂單編號：日期 + 流水號
+            string today = DateTime.Now.ToString("yyyyMMdd");
+            int count = _context.Orders.Count(o => o.OrderDate.Date == DateTime.Today) + 1;
+            string orderId = $"{today}{count:D4}";
+
+            // 建立訂單
+            var order = new Order
+            {
+                OrderId = orderId,
+                CustomerName = customerName,
+                OrderDate = DateTime.Now,
+                TotalAmount = (int)cart.Sum(c => c.Price * c.Quantity),
+                OrderDetails = cart.Select(c => new OrderDetail
+                {
+                    ProductId = c.ProductId,
+                    Quantity = c.Quantity,
+                    UnitPrice = c.Price
+                }).ToList()
+            };
+
+            _context.Orders.Add(order);
+            _context.SaveChanges(); // 存入資料庫
+
+            // 建立 ViewModel
+            var orderVM = new OrderViewModel
+            {
+                OrderId = order.OrderId,
+                CreatedAt = order.OrderDate,
+                Items = cart.Select(c => new CartItem
+                {
+                    ProductId = c.ProductId,
+                    Name = c.Name,
+                    Price = c.Price,
+                    Quantity = c.Quantity,
+                    ImagePath = c.ImagePath,
+                    Stock = c.Stock
+                }).ToList()
+            };
+
+            HttpContext.Session.SetObject("TempOrder", orderVM);
+            HttpContext.Session.Remove(CartSessionKey);
+
+            return RedirectToAction("CheckoutSuccess");
+        }
+
+
 
     }
 }
