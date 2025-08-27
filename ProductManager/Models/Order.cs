@@ -13,7 +13,7 @@ namespace ProductManager.Models
         [Required]
         [StringLength(100)]
         public string CustomerName { get; set; }
-        public int TotalAmount { get; set; }
+        public decimal TotalAmount { get; set; }
         public List<OrderDetail> OrderDetails { get; set; }
     }
 

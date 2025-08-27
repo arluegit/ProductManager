@@ -50,8 +50,8 @@ else
     <h4>總金額: <span id="totalAmount">@Model.Sum(c => c.Price * c.Quantity).ToString("C0", CultureInfo.CreateSpecificCulture("zh-TW"))</span></h4>
     <a asp-controller="Cart" asp-action="Clear" class="btn btn-warning">清空購物車</a>
 }
-
 <a asp-controller="Cart" asp-action="Checkout" class="btn btn-success">結帳</a>
+
 
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

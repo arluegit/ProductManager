@@ -177,6 +177,17 @@ namespace ProductManager.Controllers
             return Json(new { success = true });
         }
 
+        // GET: Cart/Checkout
+        [HttpGet]
+        public IActionResult Checkout()
+        {
+            var cart = HttpContext.Session.GetObject<List<CartItem>>(CartSessionKey) ?? new List<CartItem>();
+            if (!cart.Any())
+            {
+                return RedirectToAction("Index");
+            }
+            return View(cart); // 顯示 Checkout.cshtml
+        }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -184,6 +195,7 @@ namespace ProductManager.Controllers
         {
             var cart = HttpContext.Session.GetObject<List<CartItem>>(CartSessionKey) ?? new List<CartItem>();
             if (!cart.Any()) return RedirectToAction("Index", "Cart");
+            //return View(cart); // 把購物車傳到結帳頁面
 
             // 訂單編號：日期 + 流水號
             string today = DateTime.Now.ToString("yyyyMMdd");
@@ -196,7 +208,7 @@ namespace ProductManager.Controllers
                 OrderId = orderId,
                 CustomerName = customerName,
                 OrderDate = DateTime.Now,
-                TotalAmount = (int)cart.Sum(c => c.Price * c.Quantity),
+                TotalAmount = cart.Sum(c => c.Price * c.Quantity),
                 OrderDetails = cart.Select(c => new OrderDetail
                 {
                     ProductId = c.ProductId,
@@ -230,7 +242,13 @@ namespace ProductManager.Controllers
             return RedirectToAction("CheckoutSuccess");
         }
 
-
+        // GET: Cart/CheckoutSuccess
+        public IActionResult CheckoutSuccess()
+        {
+            var orderVM = HttpContext.Session.GetObject<OrderViewModel>("TempOrder");
+            if (orderVM == null) return RedirectToAction("Index");
+            return View(orderVM);
+        }
 
     }
 }

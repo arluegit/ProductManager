@@ -1,0 +1,41 @@
+﻿@model List<ProductManager.Models.CartItem>
+@using System.Globalization
+
+<h2>結帳確認</h2>
+
+<form asp-action="Checkout" method="post">
+    @Html.AntiForgeryToken()
+
+    <div class="mb-3">
+        <label for="customerName" class="form-label">姓名</label>
+        <input type="text" class="form-control" id="customerName" name="customerName" required />
+    </div>
+
+    <h4>購物車明細</h4>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>商品</th>
+                <th>單價</th>
+                <th>數量</th>
+                <th>小計</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Name</td>
+                    <td>@item.Price.ToString("C0", CultureInfo.CreateSpecificCulture("zh-TW"))</td>
+                    <td>@item.Quantity</td>
+                    <td>@((item.Price * item.Quantity).ToString("C0", CultureInfo.CreateSpecificCulture("zh-TW")))</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <h4>總金額: @Model.Sum(c => c.Price * c.Quantity).ToString("C0", CultureInfo.CreateSpecificCulture("zh-TW"))</h4>
+
+    <button type="submit" class="btn btn-success">確認結帳</button>
+    <a asp-controller="Cart" asp-action="Index" class="btn btn-secondary">返回購物車</a>
+</form>
