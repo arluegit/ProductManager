@@ -11,6 +11,10 @@ namespace ProductManager.Models
         [StringLength(50)]
         public string Username { get; set; } = "";
 
+        [Required(ErrorMessage = "請輸入Email")]
+        [EmailAddress(ErrorMessage = "Email格式錯誤")]
+        public string Email { get; set; } = "";
+
         [Required(ErrorMessage = "請輸入密碼")]
         [DataType(DataType.Password)]
         public string Password { get; set; } = "";

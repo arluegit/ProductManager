@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ProductManager.Models;
 using ProductManager.Helpers;
+using System.Net;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 
 
 namespace ProductManager.Controllers
@@ -106,9 +108,9 @@ namespace ProductManager.Controllers
                 {
                     cart.Remove(item);
                 }
-                else if (quantity > product.Quantity)
+                else if (quantity > product.Stock)
                 {
-                    return Json(new { success = false, message = $"庫存不足，剩餘 {product.Quantity}" });
+                    return Json(new { success = false, message = $"庫存不足，剩餘 {product.Stock}" });
                 }
                 else
                 {
@@ -119,7 +121,9 @@ namespace ProductManager.Controllers
             }
 
             var totalAmount = cart.Sum(c => c.Price * c.Quantity);
-            var itemTotal = item != null ? item.Price * item.Quantity : 0;
+            var itemTotal = cart.FirstOrDefault(c => c.ProductId == id)?.Price *
+                cart.FirstOrDefault(c => c.ProductId == id)?.Quantity ?? 0;
+
 
             return Json(new { success = true, itemTotal, totalAmount });
         }
@@ -191,22 +195,22 @@ namespace ProductManager.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Checkout(string customerName)
+        public IActionResult Checkout(string customerName, string phone, string email, string address)
         {
             var cart = HttpContext.Session.GetObject<List<CartItem>>(CartSessionKey) ?? new List<CartItem>();
             if (!cart.Any()) return RedirectToAction("Index", "Cart");
-            //return View(cart); // 把購物車傳到結帳頁面
 
-            // 訂單編號：日期 + 流水號
             string today = DateTime.Now.ToString("yyyyMMdd");
             int count = _context.Orders.Count(o => o.OrderDate.Date == DateTime.Today) + 1;
             string orderId = $"{today}{count:D4}";
 
-            // 建立訂單
             var order = new Order
             {
                 OrderId = orderId,
                 CustomerName = customerName,
+                Phone = phone,
+                Email = email,
+                Address = address,
                 OrderDate = DateTime.Now,
                 TotalAmount = cart.Sum(c => c.Price * c.Quantity),
                 OrderDetails = cart.Select(c => new OrderDetail
@@ -220,7 +224,6 @@ namespace ProductManager.Controllers
             _context.Orders.Add(order);
             _context.SaveChanges(); // 存入資料庫
 
-            // 建立 ViewModel
             var orderVM = new OrderViewModel
             {
                 OrderId = order.OrderId,

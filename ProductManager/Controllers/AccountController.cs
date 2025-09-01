@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using ProductManager.Helpers;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 
 public class AccountController : Controller
 {
@@ -85,7 +86,7 @@ public class AccountController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> Register(string username, string password, string confirmPassword)
+    public async Task<IActionResult> Register(string username, string password, string confirmPassword, string email)
     {
         if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
         {
@@ -105,10 +106,17 @@ public class AccountController : Controller
             return View();
         }
 
+        if (_context.Users.Any(u => u.Email == email))
+        {
+            ModelState.AddModelError("", "Email 已被使用");
+            return View();
+        }
+
         var newUser = new User
         {
             Username = username,
             Password = PasswordHelper.HashPassword(password), // 雜湊密碼
+            Email = email,
             IsActive = true // 明確指定新使用者為啟用狀態
         };
 

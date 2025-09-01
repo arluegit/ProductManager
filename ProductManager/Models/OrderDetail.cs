@@ -1,28 +1,22 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ProductManager.Models
 {
     public class OrderDetail
     {
-        public int Id { get; set; }   // 明細編號 (PK)
+        public int Id { get; set; }
 
         [Required]
-        public int OrderId { get; set; }   // 關聯到訂單
+        public int ProductId { get; set; }
 
-        [ForeignKey("OrderId")]
-        public Order Order { get; set; }
+        [Range(1, int.MaxValue, ErrorMessage = "數量必須大於0")]
+        public int Quantity { get; set; }
 
-        [Required]
-        public int ProductId { get; set; }  // 關聯到商品
+        [Range(0, double.MaxValue, ErrorMessage = "單價不能小於0")]
+        public decimal UnitPrice { get; set; }
 
-        [ForeignKey("ProductId")]
+        // 導覽屬性
         public Product Product { get; set; }
-
-        [Required]
-        public int Quantity { get; set; }   // 購買數量
-
-        [Required]
-        public decimal UnitPrice { get; set; }   // 當下單價 (避免商品後來改價)
+        public Order Order { get; set; }
     }
 }
