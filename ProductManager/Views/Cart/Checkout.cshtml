@@ -1,4 +1,4 @@
-﻿@model List<ProductManager.Models.CartItem>
+﻿@model ProductManager.Models.CheckoutViewModel
 @using System.Globalization
 
 <h2>結帳確認</h2>
@@ -6,24 +6,31 @@
 <form asp-action="Checkout" method="post">
     @Html.AntiForgeryToken()
 
+    <!-- 驗證錯誤訊息 -->
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
     <div class="mb-3">
-        <label for="customerName" class="form-label">姓名</label>
-        <input type="text" class="form-control" id="customerName" name="customerName" required />
+        <label asp-for="CustomerName" class="form-label"></label>
+        <input asp-for="CustomerName" class="form-control" />
+        <span asp-validation-for="CustomerName" class="text-danger"></span>
     </div>
 
     <div class="mb-3">
-        <label for="phone" class="form-label">電話</label>
-        <input type="tel" class="form-control" id="phone" name="phone" required />
+        <label asp-for="Phone" class="form-label"></label>
+        <input asp-for="Phone" class="form-control" />
+        <span asp-validation-for="Phone" class="text-danger"></span>
     </div>
 
     <div class="mb-3">
-        <label for="email" class="form-label">Email</label>
-        <input type="email" class="form-control" id="email" name="email" required />
+        <label asp-for="Email" class="form-label"></label>
+        <input asp-for="Email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
     </div>
 
     <div class="mb-3">
-        <label for="address" class="form-label">地址</label>
-        <input type="text" class="form-control" id="address" name="address" required />
+        <label asp-for="Address" class="form-label"></label>
+        <input asp-for="Address" class="form-control" />
+        <span asp-validation-for="Address" class="text-danger"></span>
     </div>
 
     <h4>購物車明細</h4>
@@ -37,7 +44,7 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (var item in Model)
+            @foreach (var item in Model.Items)
             {
                 <tr>
                     <td>@item.Name</td>
@@ -49,8 +56,47 @@
         </tbody>
     </table>
 
-    <h4>總金額: @Model.Sum(c => c.Price * c.Quantity).ToString("C0", CultureInfo.CreateSpecificCulture("zh-TW"))</h4>
+    <h4>總金額: @Model.TotalAmount.ToString("C0", CultureInfo.CreateSpecificCulture("zh-TW"))</h4>
 
     <button type="submit" class="btn btn-success">確認結帳</button>
     <a asp-controller="Cart" asp-action="Index" class="btn btn-secondary">返回購物車</a>
 </form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        function updateCartQuantity(productId, newQty) {
+            $.ajax({
+                url: '/Cart/UpdateQuantityAjax',
+                type: 'POST',
+                data: { id: productId, quantity: newQty },
+                success: function (res) {
+                    if (!res.success) {
+                        alert(res.message);
+                        location.reload();
+                    } else {
+                        $('#item-total-' + productId).text(
+                            (res.itemTotal).toLocaleString('zh-TW', { style: 'currency', currency: 'TWD' })
+                        );
+                        $('#cart-total').text(
+                            (res.totalAmount).toLocaleString('zh-TW', { style: 'currency', currency: 'TWD' })
+                        );
+                    }
+                },
+                error: function () {
+                    alert('更新失敗，請稍後再試');
+                }
+            });
+        }
+
+        // 自動帶入登入使用者資訊（如果有的話）
+        $(document).ready(function () {
+            var username = '@Model.CustomerName';
+            var email = '@Model.Email';
+
+            if (username) $('#CustomerName').val(username);
+            if (email) $('#Email').val(email);
+        });
+    </script>
+}

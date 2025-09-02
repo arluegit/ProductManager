@@ -36,6 +36,7 @@ else
                     <td>@item.Price.ToString("C0", CultureInfo.CreateSpecificCulture("zh-TW"))</td>
                     <td>
                         <input type="number" class="quantity-input" value="@item.Quantity" min="1" max="@item.Stock" style="width:60px;" />
+
                     </td>
                     <td class="item-total">@((item.Price * item.Quantity).ToString("C0", CultureInfo.CreateSpecificCulture("zh-TW")))</td>
                     <td>

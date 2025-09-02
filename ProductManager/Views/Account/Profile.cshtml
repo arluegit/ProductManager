@@ -9,6 +9,7 @@
 <div class="card">
     <div class="card-body">
         <p><strong>使用者名稱：</strong> @Model.Username</p>
+        <p><strong>電子郵件：</strong> @Model.Email</p>
         <!--<p><strong>角色：</strong> @string.Join(", ", Model.UserRoles.Select(ur => ur.Role.Name))</p>-->
         <a asp-action="ChangePassword" class="btn btn-warning">修改密碼</a>
     </div>

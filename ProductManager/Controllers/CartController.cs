@@ -108,7 +108,7 @@ namespace ProductManager.Controllers
                 {
                     cart.Remove(item);
                 }
-                else if (quantity > product.Stock)
+                else if (item.Quantity + quantity > product.Stock)
                 {
                     return Json(new { success = false, message = $"庫存不足，剩餘 {product.Stock}" });
                 }
@@ -186,64 +186,125 @@ namespace ProductManager.Controllers
         public IActionResult Checkout()
         {
             var cart = HttpContext.Session.GetObject<List<CartItem>>(CartSessionKey) ?? new List<CartItem>();
-            if (!cart.Any())
+            if (!cart.Any()) return RedirectToAction("Index");
+
+            // 取得登入使用者
+            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId")?.Value;
+            User? currentUser = null;
+            if (userIdClaim != null)
             {
-                return RedirectToAction("Index");
+                int userId = int.Parse(userIdClaim);
+                currentUser = _context.Users.Find(userId);
             }
-            return View(cart); // 顯示 Checkout.cshtml
+
+            var model = new CheckoutViewModel
+            {
+                Items = cart,
+                CustomerName = currentUser?.Username ?? "",
+                Email = currentUser?.Email ?? ""
+            };
+
+            return View(model);
         }
 
+        // POST: Cart/Checkout
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Checkout(string customerName, string phone, string email, string address)
+        public IActionResult Checkout(CheckoutViewModel model)
         {
             var cart = HttpContext.Session.GetObject<List<CartItem>>(CartSessionKey) ?? new List<CartItem>();
-            if (!cart.Any()) return RedirectToAction("Index", "Cart");
+            model.Items = cart;
 
-            string today = DateTime.Now.ToString("yyyyMMdd");
-            int count = _context.Orders.Count(o => o.OrderDate.Date == DateTime.Today) + 1;
-            string orderId = $"{today}{count:D4}";
-
-            var order = new Order
+            if (!cart.Any())
             {
-                OrderId = orderId,
-                CustomerName = customerName,
-                Phone = phone,
-                Email = email,
-                Address = address,
-                OrderDate = DateTime.Now,
-                TotalAmount = cart.Sum(c => c.Price * c.Quantity),
-                OrderDetails = cart.Select(c => new OrderDetail
-                {
-                    ProductId = c.ProductId,
-                    Quantity = c.Quantity,
-                    UnitPrice = c.Price
-                }).ToList()
-            };
+                ModelState.AddModelError("", "購物車是空的，無法結帳");
+            }
 
-            _context.Orders.Add(order);
-            _context.SaveChanges(); // 存入資料庫
-
-            var orderVM = new OrderViewModel
+            if (!ModelState.IsValid)
             {
-                OrderId = order.OrderId,
-                CreatedAt = order.OrderDate,
-                Items = cart.Select(c => new CartItem
+                return View(model);
+            }
+
+            // 取得資料庫商品
+            var productIds = cart.Select(c => c.ProductId).ToList();
+            var products = _context.Products
+                                   .Where(p => productIds.Contains(p.Id))
+                                   .ToDictionary(p => p.Id);
+
+            foreach (var item in cart)
+            {
+                if (!products.ContainsKey(item.ProductId))
                 {
-                    ProductId = c.ProductId,
-                    Name = c.Name,
-                    Price = c.Price,
-                    Quantity = c.Quantity,
-                    ImagePath = c.ImagePath,
-                    Stock = c.Stock
-                }).ToList()
-            };
+                    ModelState.AddModelError("", $"找不到商品 {item.Name}");
+                    return View(model);
+                }
 
-            HttpContext.Session.SetObject("TempOrder", orderVM);
-            HttpContext.Session.Remove(CartSessionKey);
+                var stock = products[item.ProductId].Stock;
+                if (stock < item.Quantity)
+                {
+                    ModelState.AddModelError("", $"商品 {item.Name} 庫存不足，剩餘 {stock} 件");
+                    return View(model);
+                }
+            }
 
-            return RedirectToAction("CheckoutSuccess");
+            using var transaction = _context.Database.BeginTransaction();
+
+            try
+            {
+                string today = DateTime.Now.ToString("yyyyMMdd");
+                int count = _context.Orders.Count(o => o.OrderDate.Date == DateTime.Today) + 1;
+                string orderId = $"{today}{count:D4}";
+
+                var order = new Order
+                {
+                    OrderId = orderId,
+                    CustomerName = model.CustomerName,
+                    Phone = model.Phone,
+                    Email = model.Email,
+                    Address = model.Address,
+                    OrderDate = DateTime.Now,
+                    TotalAmount = model.TotalAmount,
+                    OrderDetails = cart.Select(c => new OrderDetail
+                    {
+                        ProductId = c.ProductId,
+                        Quantity = c.Quantity,
+                        UnitPrice = c.Price
+                    }).ToList()
+                };
+
+                _context.Orders.Add(order);
+
+                // 扣庫存
+                foreach (var item in cart)
+                {
+                    var product = products[item.ProductId];
+                    product.Stock -= item.Quantity;
+                    _context.Products.Update(product);
+                }
+
+                _context.SaveChanges();
+                transaction.Commit();
+
+                var orderVM = new OrderViewModel
+                {
+                    OrderId = order.OrderId,
+                    CreatedAt = order.OrderDate,
+                    Items = cart
+                };
+
+                HttpContext.Session.SetObject("TempOrder", orderVM);
+                HttpContext.Session.Remove(CartSessionKey);
+
+                return RedirectToAction("CheckoutSuccess");
+            }
+            catch
+            {
+                transaction.Rollback();
+                ModelState.AddModelError("", "訂單建立失敗，請稍後再試");
+                return View(model);
+            }
         }
+
 
         // GET: Cart/CheckoutSuccess
         public IActionResult CheckoutSuccess()
