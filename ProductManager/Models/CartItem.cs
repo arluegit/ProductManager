@@ -9,7 +9,5 @@
         public string? ImagePath { get; set; }
         public decimal SubTotal => Quantity * Price;
 
-        // 只用於前端最大值限制
-        public int Stock { get; set; }
     }
 }

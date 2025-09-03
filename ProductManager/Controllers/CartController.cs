@@ -171,8 +171,7 @@ namespace ProductManager.Controllers
                     Name = product.Name,
                     Price = product.Price,
                     Quantity = quantity,
-                    ImagePath = product.ImagePath,
-                    Stock = product.Quantity
+                    ImagePath = product.ImagePath
                 });
             }        
 
@@ -239,10 +238,10 @@ namespace ProductManager.Controllers
                     return View(model);
                 }
 
-                var stock = products[item.ProductId].Stock;
-                if (stock < item.Quantity)
+                var product = products[item.ProductId];
+                if (product.Quantity < item.Quantity) // ✅ 使用 Quantity
                 {
-                    ModelState.AddModelError("", $"商品 {item.Name} 庫存不足，剩餘 {stock} 件");
+                    ModelState.AddModelError("", $"商品 {item.Name} 庫存不足，剩餘 {product.Quantity} 件");
                     return View(model);
                 }
             }
@@ -255,12 +254,21 @@ namespace ProductManager.Controllers
                 int count = _context.Orders.Count(o => o.OrderDate.Date == DateTime.Today) + 1;
                 string orderId = $"{today}{count:D4}";
 
+                // 重新抓取登入使用者，避免用 POST 的空值
+                var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId")?.Value;
+                User? currentUser = null;
+                if (userIdClaim != null)
+                {
+                    int userId = int.Parse(userIdClaim);
+                    currentUser = _context.Users.Find(userId);
+                }
+
                 var order = new Order
                 {
                     OrderId = orderId,
-                    CustomerName = model.CustomerName,
+                    CustomerName = currentUser?.Username ?? model.CustomerName, // ✅ 優先使用登入者名稱
                     Phone = model.Phone,
-                    Email = model.Email,
+                    Email = currentUser?.Email ?? model.Email,                 // ✅ 優先使用登入者 Email
                     Address = model.Address,
                     OrderDate = DateTime.Now,
                     TotalAmount = model.TotalAmount,
@@ -274,11 +282,11 @@ namespace ProductManager.Controllers
 
                 _context.Orders.Add(order);
 
-                // 扣庫存
+                // ✅ 扣庫存（正確使用 Quantity）
                 foreach (var item in cart)
                 {
                     var product = products[item.ProductId];
-                    product.Stock -= item.Quantity;
+                    product.Quantity -= item.Quantity;
                     _context.Products.Update(product);
                 }
 

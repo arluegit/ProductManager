@@ -1,6 +1,7 @@
 ﻿@model List<ProductManager.Models.CartItem>
 @using System.Globalization
 
+
 <h2>購物車</h2>
 
 @if (!Model.Any())
@@ -35,7 +36,7 @@ else
                     </td>
                     <td>@item.Price.ToString("C0", CultureInfo.CreateSpecificCulture("zh-TW"))</td>
                     <td>
-                        <input type="number" class="quantity-input" value="@item.Quantity" min="1" max="@item.Stock" style="width:60px;" />
+                        <input type="number" class="quantity-input" value="@item.Quantity" min="1" style="width:60px;" />
 
                     </td>
                     <td class="item-total">@((item.Price * item.Quantity).ToString("C0", CultureInfo.CreateSpecificCulture("zh-TW")))</td>
