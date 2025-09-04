@@ -48,10 +48,11 @@ public class AccountController : Controller
 
         // 建立 Claims
         var claims = new List<Claim>
-    {
-        new(ClaimTypes.Name, user.Username),
-        new(ClaimTypes.NameIdentifier, user.Id.ToString())
-    };
+        {
+            new("UserId", user.Id.ToString()),            // 額外放一個自訂的 UserId
+            new(ClaimTypes.Name, user.Username),          // 使用者名稱
+            new(ClaimTypes.Email, user.Email ?? "")       // Email
+        };
 
         // 加入角色 Claim
         foreach (var userRole in user.UserRoles)

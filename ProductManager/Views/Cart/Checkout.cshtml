@@ -11,7 +11,7 @@
 
     <div class="mb-3">
         <label asp-for="CustomerName" class="form-label"></label>
-        <input asp-for="CustomerName" class="form-control" />
+        <input asp-for="CustomerName" class="form-control"/>
         <span asp-validation-for="CustomerName" class="text-danger"></span>
     </div>
 
@@ -56,8 +56,12 @@
         </tbody>
     </table>
 
-    <h4>總金額: @Model.TotalAmount.ToString("C0", CultureInfo.CreateSpecificCulture("zh-TW"))</h4>
-
+    <tfoot>
+        <tr>
+            <td colspan="3" class="text-end"><strong>總金額</strong></td>
+            <td><strong>@Model.TotalAmount.ToString("C0", CultureInfo.CreateSpecificCulture("zh-TW"))</strong></td>
+        </tr>
+    </tfoot>
     <button type="submit" class="btn btn-success">確認結帳</button>
     <a asp-controller="Cart" asp-action="Index" class="btn btn-secondary">返回購物車</a>
 </form>

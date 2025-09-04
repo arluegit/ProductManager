@@ -3,6 +3,7 @@ using ProductManager.Models;
 using ProductManager.Helpers;
 using System.Net;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
+using System.Security.Claims;
 
 
 namespace ProductManager.Controllers
@@ -187,20 +188,11 @@ namespace ProductManager.Controllers
             var cart = HttpContext.Session.GetObject<List<CartItem>>(CartSessionKey) ?? new List<CartItem>();
             if (!cart.Any()) return RedirectToAction("Index");
 
-            // 取得登入使用者
-            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId")?.Value;
-            User? currentUser = null;
-            if (userIdClaim != null)
-            {
-                int userId = int.Parse(userIdClaim);
-                currentUser = _context.Users.Find(userId);
-            }
-
             var model = new CheckoutViewModel
             {
                 Items = cart,
-                CustomerName = currentUser?.Username ?? "",
-                Email = currentUser?.Email ?? ""
+                CustomerName = User.Identity?.Name ?? "", // 直接使用 ClaimTypes.Name
+                Email = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value ?? ""
             };
 
             return View(model);
