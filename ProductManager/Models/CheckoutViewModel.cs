@@ -23,5 +23,9 @@ namespace ProductManager.Models
 
         // 自動計算總金額
         public decimal TotalAmount => Items.Sum(i => i.Price * i.Quantity);
+
+        // 新增這兩個屬性
+        public string OrderId { get; set; }
+        public DateTime CreatedAt { get; set; }
     }
 }

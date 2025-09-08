@@ -244,10 +244,15 @@ namespace ProductManager.Controllers
             {
                 string today = DateTime.Now.ToString("yyyyMMdd");
                 int count = _context.Orders.Count(o => o.OrderDate.Date == DateTime.Today) + 1;
-                string orderId = $"{today}{count:D4}";
+                //string orderId = $"{today}{count:D4}";
+                // 更安全的訂單編號生成
+                string orderId = $"{DateTime.Now:yyyyMMddHHmmssfff}-{Guid.NewGuid().ToString().Substring(0, 4)}";
+
 
                 // 重新抓取登入使用者，避免用 POST 的空值
-                var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId")?.Value;
+                //var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId")?.Value;
+                var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
                 User? currentUser = null;
                 if (userIdClaim != null)
                 {
@@ -257,7 +262,7 @@ namespace ProductManager.Controllers
 
                 var order = new Order
                 {
-                    OrderId = orderId,
+                    OrderNumber = orderId,
                     CustomerName = currentUser?.Username ?? model.CustomerName, // ✅ 優先使用登入者名稱
                     Phone = model.Phone,
                     Email = currentUser?.Email ?? model.Email,                 // ✅ 優先使用登入者 Email
@@ -270,6 +275,7 @@ namespace ProductManager.Controllers
                         Quantity = c.Quantity,
                         UnitPrice = c.Price
                     }).ToList()
+
                 };
 
                 _context.Orders.Add(order);
@@ -285,14 +291,18 @@ namespace ProductManager.Controllers
                 _context.SaveChanges();
                 transaction.Commit();
 
-                var orderVM = new OrderViewModel
-                {
-                    OrderId = order.OrderId,
-                    CreatedAt = order.OrderDate,
-                    Items = cart
-                };
+                
 
-                HttpContext.Session.SetObject("TempOrder", orderVM);
+                HttpContext.Session.SetObject("TempOrder", new CheckoutViewModel
+                {
+                    CustomerName = order.CustomerName,
+                    Email = order.Email,
+                    Phone = order.Phone,
+                    Address = order.Address,
+                    Items = cart,
+                    OrderId = order.OrderNumber,       // ✅ 加這行
+                    CreatedAt = order.OrderDate        // ✅ 加這行
+                });
                 HttpContext.Session.Remove(CartSessionKey);
 
                 return RedirectToAction("CheckoutSuccess");
@@ -309,7 +319,7 @@ namespace ProductManager.Controllers
         // GET: Cart/CheckoutSuccess
         public IActionResult CheckoutSuccess()
         {
-            var orderVM = HttpContext.Session.GetObject<OrderViewModel>("TempOrder");
+            var orderVM = HttpContext.Session.GetObject<CheckoutViewModel>("TempOrder");
             if (orderVM == null) return RedirectToAction("Index");
             return View(orderVM);
         }

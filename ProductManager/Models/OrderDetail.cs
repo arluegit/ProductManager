@@ -14,6 +14,7 @@ namespace ProductManager.Models
 
         [Range(0, double.MaxValue, ErrorMessage = "單價不能小於0")]
         public decimal UnitPrice { get; set; }
+        public int OrderId { get; set; }
 
         // 導覽屬性
         public Product Product { get; set; }

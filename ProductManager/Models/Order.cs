@@ -10,7 +10,8 @@ namespace ProductManager.Models
 
         [Required]
         [StringLength(20, ErrorMessage = "訂單編號不可超過20字")]
-        public string OrderId { get; set; } // 自訂訂單編號
+        //public string OrderId { get; set; } // 自訂訂單編號        
+        public string OrderNumber { get; set; }
 
         [Required]
         public DateTime OrderDate { get; set; }
@@ -38,13 +39,5 @@ namespace ProductManager.Models
 
     }
 
-    public class OrderViewModel
-    {
-        public string OrderId { get; set; } // 假的訂單編號
-        public DateTime CreatedAt { get; set; } = DateTime.Now; // 假的建立時間
-        public List<CartItem> Items { get; set; } = new List<CartItem>();
-
-        // 自動計算總金額
-        public decimal TotalAmount => Items.Sum(i => i.Price * i.Quantity);
-    }
+   
 }
