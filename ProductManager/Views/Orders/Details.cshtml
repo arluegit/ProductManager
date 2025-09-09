@@ -1,0 +1,50 @@
+﻿@model ProductManager.Models.Order
+
+<h2>訂單詳細</h2>
+
+<div class="mb-3">
+    <strong>訂單編號：</strong> @Model.OrderNumber <br />
+    <strong>日期：</strong> @Model.OrderDate.ToString("yyyy-MM-dd HH:mm") <br />
+    <strong>姓名：</strong> @Model.CustomerName <br />
+    <strong>電話：</strong> @Model.Phone <br />
+    <strong>Email：</strong> @Model.Email <br />
+    <strong>地址：</strong> @Model.Address <br />
+    <strong>總金額：</strong> @Model.TotalAmount <br />
+</div>
+
+<div class="mb-3">
+    <form asp-action="UpdateStatus" method="post">
+        <input type="hidden" name="id" value="@Model.Id" />
+        <label>訂單狀態：</label>
+        <select name="status" class="form-control">
+            <option value="待處理" selected="@(Model.Status == "待處理")">待處理</option>
+            <option value="已出貨" selected="@(Model.Status == "已出貨")">已出貨</option>
+            <option value="已完成" selected="@(Model.Status == "已完成")">已完成</option>
+            <option value="已取消" selected="@(Model.Status == "已取消")">已取消</option>
+        </select>
+        <button type="submit" class="btn btn-success mt-2">更新狀態</button>
+    </form>
+</div>
+
+<h3>訂單商品</h3>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>商品名稱</th>
+            <th>數量</th>
+            <th>單價</th>
+            <th>小計</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var detail in Model.OrderDetails)
+        {
+            <tr>
+                <td>@detail.Product?.Name</td>
+                <td>@detail.Quantity</td>
+                <td>@detail.UnitPrice</td>
+                <td>@(detail.Quantity * detail.UnitPrice)</td>
+            </tr>
+        }
+    </tbody>
+</table>

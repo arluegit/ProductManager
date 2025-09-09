@@ -37,7 +37,10 @@ namespace ProductManager.Models
 
         public List<OrderDetail> OrderDetails { get; set; }
 
+        [StringLength(20)]
+        public string Status { get; set; } = "待處理";
+
     }
 
-   
+
 }
