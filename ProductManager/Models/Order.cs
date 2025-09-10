@@ -39,6 +39,10 @@ namespace ProductManager.Models
 
         [StringLength(20)]
         public string Status { get; set; } = "待處理";
+        public int? UserId { get; set; }
+        public User? User { get; set; }
+
+
 
     }
 

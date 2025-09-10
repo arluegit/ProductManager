@@ -1,0 +1,29 @@
+﻿@model IEnumerable<ProductManager.Models.Order>
+
+<h2>我的訂單</h2>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>訂單編號</th>
+            <th>下單日期</th>
+            <th>總金額</th>
+            <th>狀態</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var order in Model)
+        {
+            <tr>
+                <td>@order.OrderNumber</td>
+                <td>@order.OrderDate.ToString("yyyy-MM-dd")</td>
+                <td>@order.TotalAmount.ToString("C")</td>
+                <td>@order.Status</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@order.Id" class="btn btn-info btn-sm">查看明細</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

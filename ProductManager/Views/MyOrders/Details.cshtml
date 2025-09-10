@@ -1,14 +1,11 @@
 ﻿@model ProductManager.Models.Order
-@using Microsoft.AspNetCore.Mvc.Rendering
 
 <h2>訂單明細 - @Model.OrderNumber</h2>
 
 <div>
-    <p><strong>客戶姓名：</strong>@Model.CustomerName</p>
-    <p><strong>Email：</strong>@Model.Email</p>
-    <p><strong>電話：</strong>@Model.Phone</p>
-    <p><strong>地址：</strong>@Model.Address</p>
+    <p><strong>下單日期：</strong>@Model.OrderDate.ToString("yyyy-MM-dd HH:mm")</p>
     <p><strong>總金額：</strong>@Model.TotalAmount.ToString("C")</p>
+    <p><strong>狀態：</strong>@Model.Status</p>
 </div>
 
 <h3>商品明細</h3>
@@ -34,11 +31,4 @@
     </tbody>
 </table>
 
-<h3>訂單狀態</h3>
-<form asp-action="UpdateStatus" method="post" class="form-inline mb-3">
-    <input type="hidden" name="id" value="@Model.Id" />
-    <select name="status" class="form-control mr-2" asp-items="ViewBag.StatusList"></select>
-    <button type="submit" class="btn btn-success">更新狀態</button>
-</form>
-
-<a asp-action="Index" class="btn btn-secondary">返回訂單清單</a>
+<a asp-action="Index" class="btn btn-secondary">返回訂單列表</a>

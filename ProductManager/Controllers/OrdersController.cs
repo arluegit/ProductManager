@@ -41,18 +41,47 @@ namespace ProductManager.Controllers
             return View(orders);
         }
 
-
         // 訂單詳細
-        public IActionResult Details(int id)
+        public async Task<IActionResult> Details(int id)
         {
-            var order = _context.Orders
-                                .Where(o => o.Id == id)
-                                .FirstOrDefault();
+            var order = await _context.Orders
+                .Include(o => o.OrderDetails)
+                .ThenInclude(od => od.Product)
+                .FirstOrDefaultAsync(o => o.Id == id);
 
             if (order == null)
                 return NotFound();
 
+            // 建立 SelectList，自動選中目前狀態
+            ViewBag.StatusList = new SelectList(
+                new List<string> { "待處理", "已出貨", "已完成", "已取消" },
+                selectedValue: order.Status
+            );
+
             return View(order);
+        }
+
+        // 更新訂單狀態
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateStatus(int id, string status)
+        {
+            var order = await _context.Orders.FindAsync(id);
+            if (order == null) return NotFound();
+
+            order.Status = status;
+
+            try
+            {
+                _context.Update(order);
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                ModelState.AddModelError("", "更新失敗，請稍後再試");
+            }
+
+            return RedirectToAction(nameof(Details), new { id });
         }
     }
 }
