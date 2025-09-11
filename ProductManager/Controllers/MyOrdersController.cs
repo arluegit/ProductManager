@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ProductManager.Models;
 using System.Security.Claims;
@@ -15,17 +16,25 @@ namespace ProductManager.Controllers
         }
 
         // 我的訂單清單
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? Status)
         {
-            // 取得登入使用者的 Id
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null) return RedirectToAction("Login", "Account");
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); // ASP.NET Core Identity 的 UserId
+            //var userId = User.FindFirstValue("UserId"); // 自訂的 Claim
 
-            // 撈出這個使用者的訂單
-            var orders = await _context.Orders
-                .Where(o => o.UserId == int.Parse(userId)) // 確認 Order 有 UserId 欄位
-                .OrderByDescending(o => o.OrderDate)
-                .ToListAsync();
+            if (!int.TryParse(userId, out var uid))
+                return RedirectToAction("Login", "Account");
+
+            var query = _context.Orders.Where(o => o.UserId == uid);
+
+
+            if (!string.IsNullOrEmpty(Status) && Status != "全部")
+                query = query.Where(o => o.Status == Status);
+
+            var orders = await query.OrderByDescending(o => o.OrderDate).ToListAsync();
+
+            //提供狀態清單給view
+            ViewBag.StatusList = new SelectList(new List<string> { "全部", "待處理", "已出貨", "已完成", "已取消" },
+            selectedValue: Status);            
 
             return View(orders);
         }
@@ -34,14 +43,16 @@ namespace ProductManager.Controllers
         public async Task<IActionResult> Details(int id)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null) return RedirectToAction("Login", "Account");
+            if (!int.TryParse(userId, out var uid))
+                return RedirectToAction("Login", "Account");
 
             var order = await _context.Orders
                 .Include(o => o.OrderDetails)
                 .ThenInclude(od => od.Product)
-                .FirstOrDefaultAsync(o => o.Id == id && o.UserId == int.Parse(userId));
+                .FirstOrDefaultAsync(o => o.Id == id && o.UserId == uid);
 
-            if (order == null) return NotFound();
+            if (order == null)
+                return NotFound();
 
             return View(order);
         }

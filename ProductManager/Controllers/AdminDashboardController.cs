@@ -20,7 +20,9 @@ public class AdminDashboardController : Controller
         var totalUsers = await _context.Users.CountAsync(); // ← 從資料庫查出總人數
         var activeUsers = await _context.Users.CountAsync(u => u.IsActive);
         var totalProducts = await _context.Products.CountAsync();
+        //var totalCategories = await _context.Category.CountAsync();
         var totalCategories = await _context.Category.CountAsync();
+
         var recentUsers = await _context.Users
             .OrderByDescending(u => u.Id)
             .Take(5)

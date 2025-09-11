@@ -1,4 +1,11 @@
 ﻿@model ProductManager.Models.Order
+@*@if (!Model.Any())
+{
+    <tr>
+        <td colspan="5" class="text-center">目前沒有訂單</td>
+    </tr>
+}*@
+
 
 <h2>訂單明細 - @Model.OrderNumber</h2>
 
@@ -30,5 +37,12 @@
         }
     </tbody>
 </table>
+<tfoot>
+    <tr>
+        <td colspan="3" class="text-right"><strong>總金額：</strong></td>
+        <td>@Model.TotalAmount.ToString("C")</td>
+    </tr>
+</tfoot>
+
 
 <a asp-action="Index" class="btn btn-secondary">返回訂單列表</a>

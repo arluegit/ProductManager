@@ -49,7 +49,8 @@ public class AccountController : Controller
         // 建立 Claims
         var claims = new List<Claim>
         {
-            new("UserId", user.Id.ToString()),            // 額外放一個自訂的 UserId
+            //new("UserId", user.Id.ToString()),            // 額外放一個自訂的 UserId
+            new(ClaimTypes.NameIdentifier, user.Id.ToString()), //userid 正式用法
             new(ClaimTypes.Name, user.Username),          // 使用者名稱
             new(ClaimTypes.Email, user.Email ?? "")       // Email
         };
@@ -315,7 +316,9 @@ public class AccountController : Controller
     [Authorize]
     public async Task<IActionResult> Profile()
     {
-        var username = User.Identity?.Name;
+        //var username = User.Identity?.Name;
+        var username = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
 
         var user = await _context.Users
             .Include(u => u.UserRoles)

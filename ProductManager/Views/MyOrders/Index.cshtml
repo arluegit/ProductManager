@@ -1,6 +1,11 @@
 ﻿@model IEnumerable<ProductManager.Models.Order>
 
 <h2>我的訂單</h2>
+<form method="get" asp-action="Index">
+    <label>狀態篩選：</label>
+    <select name="status" asp-items="ViewBag.StatusList"></select>
+    <button type="submit" class="btn btn-primary btn-sm">查詢</button>
+</form>
 
 <table class="table table-striped">
     <thead>
